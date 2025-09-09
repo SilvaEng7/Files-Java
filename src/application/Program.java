@@ -1,6 +1,10 @@
 package application;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -10,7 +14,7 @@ import entities.Product;
 
 public class Program {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
 		
 		Locale.setDefault(Locale.US);
 		Scanner sc = new Scanner(System.in);
@@ -21,10 +25,37 @@ public class Program {
 		String sourceFileStr = sc.nextLine();
 		
 		File sourceFile = new File(sourceFileStr);
-		String sourceFoulderStr = sourceFile.getParent();
+		String sourceFolderStr = sourceFile.getParent();
 		
+		boolean success = new File(sourceFolderStr + "\\out").mkdir();
+		
+		System.out.println("Folder created: " + success);
+		
+		String targetFileStr = sourceFolderStr + "\\out\\summary.csv";
+	
+		try (BufferedReader br = new BufferedReader( new FileReader(sourceFileStr))){
+			
+			String itemCsv = br.readLine();
+			while(itemCsv != null) {
+				if (itemCsv.isBlank() || itemCsv.replace(";", "").isBlank()) {
+			        itemCsv = br.readLine();
+			        continue;
+			    }
+				
+				String [] fields = itemCsv.split(";");
+				String name = fields[0];
+				double price = Double.parseDouble(fields[1]);
+				int quantity = Integer.parseInt(fields[2]);
+				
+				list.add(new Product(name, price, quantity));
+				
+				itemCsv = br.readLine();
+			}
+			
+		}catch(IOException e) {
+			System.out.println("Error: " + e.getMessage());
+		}
 		
 		sc.close();
 	}
-
 }
